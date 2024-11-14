@@ -1,3 +1,4 @@
+from pathlib import Path
 import shutil
 import os
 
@@ -38,8 +39,7 @@ def compile_test_directory(initial_directory):
 
 
 def main():
-    # Needs changed to a relative path k thx
-    initial_dir = r"C:\Users\username\Downloads\sd04\png_txt"
+    initial_dir = Path("./sd04/png_txt")
 
     compile_train_directory(initial_dir)
     compile_test_directory(initial_dir)
