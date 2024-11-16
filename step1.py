@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import fingerprint_feature_extractor
 import fingerprint_enhancer
 import logging
