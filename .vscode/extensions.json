@@ -3,10 +3,8 @@
     "editorconfig.editorconfig",
     "ms-python.python",
     "detachhead.basedpyright",
-    "ms-python.pylint",
     "ms-python.debugpy",
-    "ms-python.isort",
-    "ms-python.black-formatter",
+    "charliermarsh.ruff"
   ],
   "unwantedRecommendations": [
     "ms-python.vscode-pylance"
