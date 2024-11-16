@@ -24,7 +24,7 @@ def setup_work_directory(dataset_directory: Path, work_directory: Path) -> None:
     # Define the training and test directories
     training_directory = work_directory.joinpath(TRAINING_DIR_NAME)
     test_directory = work_directory.joinpath(TEST_DIR_NAME)
-    logging.debug(f"Copying data from {dataset_directory} to {work_directory}...")
+    logging.info(f"Copying data from {dataset_directory} to {work_directory}...")
 
     # Ensure the work directory exists and is empty
     if work_directory.is_file():
