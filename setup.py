@@ -33,15 +33,8 @@ def setup_work_directory(dataset_directory: Path, work_directory: Path) -> None:
         logging.warning(f"{work_directory} already exists, removing in 10 seconds...")
         sleep(10)
 
-        # Nuke the work directory's contents recursively
-        for current_dir, dir_list, file_list in work_directory.walk(top_down=False):
-            for file_name in file_list:
-                file_path = current_dir.joinpath(file_name)
-                file_path.unlink()
-
-            for dir_name in dir_list:
-                dir_path = current_dir.joinpath(dir_name)
-                dir_path.rmdir()
+        # Nuke the work directory from orbit
+        shutil.rmtree(work_directory)
     else:
         work_directory.mkdir()
 
