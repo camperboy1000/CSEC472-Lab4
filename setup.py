@@ -35,12 +35,10 @@ def setup_work_directory(dataset_directory: Path, work_directory: Path) -> None:
 
         # Nuke the work directory from orbit
         shutil.rmtree(work_directory)
-    else:
-        work_directory.mkdir()
 
-    # Create the training and test directories
-    training_directory.mkdir()
-    test_directory.mkdir()
+    # Create the work tree
+    training_directory.mkdir(parents=True)
+    test_directory.mkdir(parents=True)
 
     # Walk the dataset directory for the fingerprint files
     for current_dir, _, file_list in dataset_directory.walk():
