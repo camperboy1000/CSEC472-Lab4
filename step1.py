@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 
-import fingerprint_feature_extractor
-import fingerprint_enhancer
 import logging
-import cv2
 import os
+from pathlib import Path
+from typing import final
+
+import cv2
+import fingerprint_enhancer
+import fingerprint_feature_extractor
+
+from enums import FingerprintFeature, Gender
 
 logger = logging.getLogger(__name__)
 
@@ -16,27 +21,46 @@ logger = logging.getLogger(__name__)
 # Try three different image matching or ML technqiues to do this
 
 
-def load_and_enhance_image(directory, filename):
+@final
+class FingerprintPair(object):
+    reference_image: Path
+    subject_image: Path
+    gender: Gender
+    feature: FingerprintFeature
+
+    __slots__ = ("reference_image", "subject_image", "gender", "feature")
+
+    def __init__(
+        self,
+        reference_image: Path,
+        subject_image: Path,
+        gender: Gender,
+        feature: FingerprintFeature,
+    ) -> None:
+        self.reference_image = reference_image
+        self.subject_image = subject_image
+        self.gender = gender
+        self.feature = feature
+
+
+def load_and_enhance_image(image_path: Path):
     # Each image is 512 x 512 pixels with 32 rows of white space at the bottom
     # Classified using one of the five following classes: A=Arch, L=Left Loop, R=Right Loop, T=Tented Arch, W=Whorl
     # Each text file for the image has the gender, class, and history information
 
-    image_path = os.path.join(directory, filename)
-
     # Read input image
-    img = cv2.imread(image_path, 0)
+    image_path_str = os.path.abspath(image_path)
+    image = cv2.imread(image_path_str)
 
     # Enhance fingerprint image
-    enhanced_img = fingerprint_enhancer.enhance_fingerprint(img)
+    enhanced_image = fingerprint_enhancer.enhance_fingerprint(image)
 
     logger.info(f"Loaded and enhanced image at {image_path}")
 
-    return enhanced_img
+    return enhanced_image
 
 
-def minutiae_extraction(directory, filename):
-    image_path = os.path.join(directory, filename)
-
+def minutiae_extraction(iamge_path: Path):
     print("Minutiae extracted")
 
 
