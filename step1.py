@@ -23,24 +23,72 @@ logger = logging.getLogger(__name__)
 
 @final
 class FingerprintPair(object):
+    number: int
     reference_image: Path
     subject_image: Path
     gender: Gender
     feature: FingerprintFeature
 
-    __slots__ = ("reference_image", "subject_image", "gender", "feature")
+    __slots__ = ("number", "reference_image", "subject_image", "gender", "feature")
 
     def __init__(
         self,
+        number: int,
         reference_image: str | Path,
         subject_image: str | Path,
         gender: str | Gender,
         feature: str | FingerprintFeature,
     ) -> None:
+        self.number = number
         self.reference_image = Path(reference_image)
         self.subject_image = Path(subject_image)
         self.gender = Gender(gender)
         self.feature = FingerprintFeature(feature)
+
+
+def load_dataset(dataset_directory: Path) -> list[FingerprintPair]:
+    logging.info(f"Loading dataset from {dataset_directory}")
+    dataset: list[FingerprintPair] = []
+
+    for reference_path in dataset_directory.glob("f*.png"):
+        # Set the Path for the cooresponding subject image
+        number = int(reference_path.name[1:5])
+        subject_name = "s" + reference_path.name[1:]
+        subject_path = reference_path.with_name(subject_name)
+
+        # Set these to None as we don't know them yet but need them later
+        gender: Gender = None  # pyright: ignore[reportAssignmentType]
+        feature: FingerprintFeature = None  # pyright: ignore[reportAssignmentType]
+        metadata_path = reference_path.with_suffix(".txt")
+        logging.debug(f"Reading {metadata_path}")
+
+        # Read the metadata file
+        with metadata_path.open() as metadata:
+            line = metadata.readline()
+            while line != "":
+                line_elements = line.split()
+                match line_elements[0]:
+                    case "Gender:":
+                        gender = Gender(line_elements[1])
+                    case "Class:":
+                        feature = FingerprintFeature(line_elements[1])
+                    case "History:":
+                        pass
+                    case _:
+                        logging.warning(
+                            f'Found extra line "{line}" while parsing {metadata_path}'
+                        )
+                line = metadata.readline()
+
+        # Create the FingerprintPair object
+        fingerprint_pair = FingerprintPair(
+            number, reference_path, subject_path, gender, feature
+        )
+
+        # Add the FingerprintPair to the dataset
+        dataset.append(fingerprint_pair)
+
+    return dataset
 
 
 def load_and_enhance_image(image_path: Path):
@@ -81,7 +129,13 @@ def technique3():
 
 
 def main():
-    logging.basicConfig(filename="step1.log", level=logging.INFO)
+    logging.basicConfig(level=logging.INFO)
+
+    dataset_directory = Path.cwd().joinpath("workdir", "train")
+    dataset = load_dataset(dataset_directory)
+
+    for fingerprint_pair in dataset:
+        print(fingerprint_pair)
 
 
 if __name__ == "__main__":
