@@ -32,15 +32,15 @@ class FingerprintPair(object):
 
     def __init__(
         self,
-        reference_image: Path,
-        subject_image: Path,
-        gender: Gender,
-        feature: FingerprintFeature,
+        reference_image: str | Path,
+        subject_image: str | Path,
+        gender: str | Gender,
+        feature: str | FingerprintFeature,
     ) -> None:
-        self.reference_image = reference_image
-        self.subject_image = subject_image
-        self.gender = gender
-        self.feature = feature
+        self.reference_image = Path(reference_image)
+        self.subject_image = Path(subject_image)
+        self.gender = Gender(gender)
+        self.feature = FingerprintFeature(feature)
 
 
 def load_and_enhance_image(image_path: Path):
