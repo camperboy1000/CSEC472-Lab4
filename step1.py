@@ -48,11 +48,11 @@ class FingerprintPair(object):
     @override
     def __repr__(self) -> str:
         return "FingerprintPair({0},{1},{2},{3},{4})".format(
-            self.number,
-            self.reference_image,
-            self.subject_image,
-            self.gender,
-            self.feature,
+            repr(self.number),
+            repr(self.reference_image),
+            repr(self.subject_image),
+            repr(self.gender),
+            repr(self.feature),
         )
 
     @override
