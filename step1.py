@@ -3,11 +3,11 @@
 import logging
 import os
 from pathlib import Path
-from typing import final
+from typing import final, override
 
 import cv2
-import fingerprint_enhancer
-import fingerprint_feature_extractor
+import fingerprint_enhancer  # pyright:ignore[reportMissingTypeStubs]
+import fingerprint_feature_extractor  # pyright:ignore[reportMissingTypeStubs]
 
 from enums import FingerprintFeature, Gender
 
@@ -45,6 +45,22 @@ class FingerprintPair(object):
         self.gender = Gender(gender)
         self.feature = FingerprintFeature(feature)
 
+    @override
+    def __repr__(self) -> str:
+        return "FingerprintPair({0},{1},{2},{3},{4})".format(
+            self.number,
+            self.reference_image,
+            self.subject_image,
+            self.gender,
+            self.feature,
+        )
+
+    @override
+    def __str__(self) -> str:
+        return "Fingerprint Pair: {0} (Gender: {1}, Class: {2})".format(
+            self.number, self.gender, self.feature
+        )
+
 
 def load_dataset(dataset_directory: Path) -> list[FingerprintPair]:
     logging.info(f"Loading dataset from {dataset_directory}")
@@ -55,14 +71,14 @@ def load_dataset(dataset_directory: Path) -> list[FingerprintPair]:
         number = int(reference_path.name[1:5])
         subject_name = "s" + reference_path.name[1:]
         subject_path = reference_path.with_name(subject_name)
+        metadata_path = reference_path.with_suffix(".txt")
 
         # Set these to None as we don't know them yet but need them later
         gender: Gender = None  # pyright: ignore[reportAssignmentType]
         feature: FingerprintFeature = None  # pyright: ignore[reportAssignmentType]
-        metadata_path = reference_path.with_suffix(".txt")
-        logging.debug(f"Reading {metadata_path}")
 
         # Read the metadata file
+        logging.debug(f"Reading {metadata_path}")
         with metadata_path.open() as metadata:
             line = metadata.readline()
             while line != "":
@@ -76,7 +92,7 @@ def load_dataset(dataset_directory: Path) -> list[FingerprintPair]:
                         pass
                     case _:
                         logging.warning(
-                            f'Found extra line "{line}" while parsing {metadata_path}'
+                            f"Found extra line {line} while parsing {metadata_path}"
                         )
                 line = metadata.readline()
 
@@ -108,7 +124,7 @@ def load_and_enhance_image(image_path: Path):
     return enhanced_image
 
 
-def minutiae_extraction(iamge_path: Path):
+def minutiae_extraction(image_path: Path):
     print("Minutiae extracted")
 
 
@@ -131,10 +147,10 @@ def technique3():
 def main():
     logging.basicConfig(level=logging.INFO)
 
-    dataset_directory = Path.cwd().joinpath("workdir", "train")
-    dataset = load_dataset(dataset_directory)
+    training_directory = Path.cwd().joinpath("workdir", "train")
+    training_dataset = load_dataset(training_directory)
 
-    for fingerprint_pair in dataset:
+    for fingerprint_pair in training_dataset:
         print(fingerprint_pair)
 
 
