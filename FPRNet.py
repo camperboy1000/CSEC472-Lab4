@@ -1,4 +1,4 @@
-from typing import final, override
+from typing import Any, final, override
 
 from torch import nn
 
@@ -7,6 +7,32 @@ from torch import nn
 
 @final
 class FeatureExtractor(nn.Module):
+    conv32: nn.Conv2d
+    conv32to64: nn.Conv2d
+    conv64: nn.Conv2d
+    conv64to128: nn.Conv2d
+    conv128: nn.Conv2d
+
+    bn32: nn.BatchNorm2d
+    bn64: nn.BatchNorm2d
+    bn128: nn.BatchNorm2d
+
+    pool: nn.MaxPool2d
+    relu: nn.ReLU
+
+    __slots__ = (
+        "conv32",
+        "conv32to64",
+        "conv64",
+        "conv64to128",
+        "conv128",
+        "bn32",
+        "bn64",
+        "bn128",
+        "pool",
+        "relu",
+    )
+
     def __init__(self) -> None:
         super().__init__()
 
@@ -24,7 +50,7 @@ class FeatureExtractor(nn.Module):
         self.relu = nn.ReLU()
 
     @override
-    def forward(self, x):
+    def forward(self, x: Any) -> Any:
         # Block 1
         x = self.conv32(x)
         x = self.bn32(x)
