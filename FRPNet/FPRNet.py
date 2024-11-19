@@ -1,6 +1,7 @@
 from typing import Any, final, override
 
 from torch import nn
+import torch
 
 # pyright: basic
 
@@ -83,4 +84,66 @@ class FeatureExtractor(nn.Module):
         x = self.bn128(x)
         x = self.relu(x)
         x = self.pool(x)
+        return x
+
+
+class FPRNet(nn.Module):
+    feature_extractor1: FeatureExtractor
+    feature_extractor2: FeatureExtractor
+    conv128to256: nn.Conv2d
+    bn256: nn.BatchNorm2d
+    bn1024: nn.BatchNorm2d
+    dense1: nn.Linear
+    dense1024: nn.Linear
+    flatten: nn.Flatten
+    dropout: nn.Dropout
+    relu: nn.ReLU
+    sigmoid: nn.Sigmoid
+
+    __slots__ = (
+        "feature_extractor1",
+        "feature_extractor2",
+        "conv128to256",
+        "bn256",
+        "bn1024",
+        "dense1",
+        "dense1024",
+        "flatten",
+        "dropout",
+        "relu",
+        "sigmoid",
+    )
+
+    def __init__(self) -> None:
+        super().__init__()
+
+        self.feature_extractor1 = FeatureExtractor()
+        self.feature_extractor2 = FeatureExtractor()
+
+        self.conv128to256 = nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1)
+        self.bn256 = nn.BatchNorm2d(256)
+        self.dense1024 = nn.Linear(256, 1024)
+        self.bn1024 = nn.BatchNorm2d(1024)
+        self.dense1 = nn.Linear(1024, 1)
+
+        self.flatten = nn.Flatten()
+        self.dropout = nn.Dropout()
+        self.relu = nn.ReLU()
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, image1: Any, image2: Any) -> Any:
+        feature1 = self.feature_extractor1(image1)
+        feature2 = self.feature_extractor2(image2)
+
+        x = torch.abs(feature1 - feature2)
+        x = self.conv128to256(x)
+        x = self.bn256(x)
+        x = self.relu(x)
+        x = self.flatten(x)
+        x = self.dense1024(x)
+        x = self.bn1024(x)
+        x = self.relu(x)
+        x = self.dropout(x)
+        x = self.dense1(x)
+        x = self.sigmoid(x)
         return x
