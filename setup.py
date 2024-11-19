@@ -35,6 +35,7 @@ def setup_work_directory(dataset_directory: Path, work_directory: Path) -> None:
 
         # Nuke the work directory from orbit
         shutil.rmtree(work_directory)
+        logging.warning(f"{work_directory} removed!")
 
     # Create the work tree
     training_directory.mkdir(parents=True)
