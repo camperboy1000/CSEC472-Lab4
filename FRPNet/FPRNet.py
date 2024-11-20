@@ -87,6 +87,7 @@ class FeatureExtractor(nn.Module):
         return x
 
 
+@final
 class FPRNet(nn.Module):
     feature_extractor1: FeatureExtractor
     feature_extractor2: FeatureExtractor
@@ -131,6 +132,7 @@ class FPRNet(nn.Module):
         self.relu = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
 
+    @override
     def forward(self, image1: Any, image2: Any) -> Any:
         feature1 = self.feature_extractor1(image1)
         feature2 = self.feature_extractor2(image2)

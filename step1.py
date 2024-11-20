@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pyright: reportMissingTypeStubs=false
 
 import logging
 import os
@@ -6,8 +7,8 @@ from pathlib import Path
 from typing import final, override
 
 import cv2
-import fingerprint_enhancer  # pyright:ignore[reportMissingTypeStubs]
-import fingerprint_feature_extractor  # pyright:ignore[reportMissingTypeStubs]
+import fingerprint_enhancer
+import fingerprint_feature_extractor
 
 from enums import FingerprintFeature, Gender
 
@@ -59,6 +60,36 @@ class FingerprintPair(object):
     def __str__(self) -> str:
         return "Fingerprint Pair: {0} (Gender: {1}, Class: {2})".format(
             self.number, self.gender, self.feature
+        )
+
+
+@final
+class PotentialFingerprintPair(object):
+    reference_image: Path
+    comparision_image: Path
+    match: bool
+
+    __slots__ = ("reference_image", "comparision_image", "match")
+
+    def __init__(
+        self, reference_image: Path | str, comparision_image: Path | str, match: bool
+    ) -> None:
+        self.reference_image = Path(reference_image)
+        self.comparision_image = Path(comparision_image)
+        self.match = match
+
+    @override
+    def __repr__(self) -> str:
+        return "PotentialFingerprintPari({0},{1},{2})".format(
+            repr(self.reference_image),
+            repr(self.comparision_image),
+            repr(self.match),
+        )
+
+    @override
+    def __str__(self) -> str:
+        return "Potential Fingerprint Pair: {0} & {1} - {2}".format(
+            self.reference_image.name, self.comparision_image.name, self.match
         )
 
 
