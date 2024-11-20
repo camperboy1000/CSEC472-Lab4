@@ -1,7 +1,7 @@
 from typing import Any, final, override
 
-from torch import nn
 import torch
+from torch import nn
 
 # pyright: basic
 
