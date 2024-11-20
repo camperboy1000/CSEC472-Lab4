@@ -3,6 +3,7 @@ from typing import final, override
 import torch
 from PIL import Image
 from torch.utils.data import Dataset
+from torchvision import transforms
 
 from step1 import PotentialFingerprintPair
 
@@ -11,12 +12,19 @@ from step1 import PotentialFingerprintPair
 class FingerprintDataset(Dataset):  # pyright: ignore[reportMissingTypeArgument]
     data: tuple[PotentialFingerprintPair] | list[PotentialFingerprintPair]
 
-    __slots__ = "data"
+    __slots__ = ("data", "transform")
 
     def __init__(
         self, dataset: tuple[PotentialFingerprintPair] | list[PotentialFingerprintPair]
     ) -> None:
         self.data = dataset
+        self.transform = transforms.Compose(
+            [
+                transforms.Resize([512, 512]),
+                transforms.ToTensor(),
+                transforms.Normalize(0.5, 0.5),
+            ]
+        )
 
     def __len__(self) -> int:
         return len(self.data)
@@ -30,9 +38,12 @@ class FingerprintDataset(Dataset):  # pyright: ignore[reportMissingTypeArgument]
         reference_image = Image.open(reference_path).convert("L")
         comparison_image = Image.open(comparison_path).convert("L")
 
+        reference_tensor = self.transform(reference_image)
+        comparison_tensor = self.transform(comparison_image)
+
         if fingerprint_pair.match:
             label = torch.tensor(1)
         else:
             label = torch.tensor(0)
 
-        return reference_image, comparison_image, label
+        return reference_tensor, comparison_tensor, label
