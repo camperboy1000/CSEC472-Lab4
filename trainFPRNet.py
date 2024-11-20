@@ -99,7 +99,9 @@ def main() -> None:
     val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
 
     model = FPRNet()
-    train(model, train_loader, val_loader)
+    train(model, train_loader, val_loader, 50)
+
+    torch.save(model, "FPRNet.pth")
 
 
 if __name__ == "__main__":
