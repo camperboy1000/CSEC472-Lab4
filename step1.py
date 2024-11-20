@@ -67,30 +67,30 @@ class FingerprintPair(object):
 @final
 class PotentialFingerprintPair(object):
     reference_image: Path
-    comparision_image: Path
+    comparison_image: Path
     match: bool
 
-    __slots__ = ("reference_image", "comparision_image", "match")
+    __slots__ = ("reference_image", "comparison_image", "match")
 
     def __init__(
-        self, reference_image: Path | str, comparision_image: Path | str, match: bool
+        self, reference_image: Path | str, comparison_image: Path | str, match: bool
     ) -> None:
         self.reference_image = Path(reference_image)
-        self.comparision_image = Path(comparision_image)
+        self.comparison_image = Path(comparison_image)
         self.match = match
 
     @override
     def __repr__(self) -> str:
         return "PotentialFingerprintPari({0},{1},{2})".format(
             repr(self.reference_image),
-            repr(self.comparision_image),
+            repr(self.comparison_image),
             repr(self.match),
         )
 
     @override
     def __str__(self) -> str:
         return "Potential Fingerprint Pair: {0} & {1} - {2}".format(
-            self.reference_image.name, self.comparision_image.name, self.match
+            self.reference_image.name, self.comparison_image.name, self.match
         )
 
     @override
@@ -101,7 +101,7 @@ class PotentialFingerprintPair(object):
         other: PotentialFingerprintPair = value
         return (
             self.reference_image == other.reference_image
-            and self.comparision_image == other.comparision_image
+            and self.comparison_image == other.comparison_image
         )
 
 
