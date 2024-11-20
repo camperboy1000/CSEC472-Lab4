@@ -42,8 +42,8 @@ class FingerprintDataset(Dataset):  # pyright: ignore[reportMissingTypeArgument]
         comparison_tensor = self.transform(comparison_image)
 
         if fingerprint_pair.match:
-            label = torch.tensor(1)
+            label = torch.tensor(1, dtype=torch.float)
         else:
-            label = torch.tensor(0)
+            label = torch.tensor(0, dtype=torch.float)
 
         return reference_tensor, comparison_tensor, label

@@ -93,7 +93,7 @@ class FPRNet(nn.Module):
     feature_extractor2: FeatureExtractor
     conv128to256: nn.Conv2d
     bn256: nn.BatchNorm2d
-    bn1024: nn.BatchNorm2d
+    bn1024: nn.BatchNorm1d
     dense1: nn.Linear
     dense1024: nn.Linear
     flatten: nn.Flatten
@@ -123,8 +123,8 @@ class FPRNet(nn.Module):
 
         self.conv128to256 = nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1)
         self.bn256 = nn.BatchNorm2d(256)
-        self.dense1024 = nn.Linear(256, 1024)
-        self.bn1024 = nn.BatchNorm2d(1024)
+        self.dense1024 = nn.Linear(256 * 1024, 1024)
+        self.bn1024 = nn.BatchNorm1d(1024)
         self.dense1 = nn.Linear(1024, 1)
 
         self.flatten = nn.Flatten()
