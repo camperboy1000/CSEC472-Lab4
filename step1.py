@@ -4,6 +4,7 @@
 import logging
 import os
 from pathlib import Path
+from random import Random
 from typing import final, override
 
 import cv2
@@ -12,7 +13,7 @@ import fingerprint_feature_extractor
 
 from enums import FingerprintFeature, Gender
 
-logger = logging.getLogger(__name__)
+RANDOM: Random = Random()
 
 # Process the TRAIN set to extract features (identify minutiae)
 
@@ -92,6 +93,17 @@ class PotentialFingerprintPair(object):
             self.reference_image.name, self.comparision_image.name, self.match
         )
 
+    @override
+    def __eq__(self, value: object) -> bool:
+        if not isinstance(value, type(self)):
+            return False
+
+        other: PotentialFingerprintPair = value
+        return (
+            self.reference_image == other.reference_image
+            and self.comparision_image == other.comparision_image
+        )
+
 
 def load_dataset(dataset_directory: Path) -> list[FingerprintPair]:
     logging.info(f"Loading dataset from {dataset_directory}")
@@ -138,6 +150,39 @@ def load_dataset(dataset_directory: Path) -> list[FingerprintPair]:
     return dataset
 
 
+def generate_randomized_dataset(
+    initial_dataset: tuple[FingerprintPair] | list[FingerprintPair],
+) -> list[PotentialFingerprintPair]:
+    testing_dataset: list[PotentialFingerprintPair] = []
+
+    for fingerprint_pair in initial_dataset:
+        # First, add the matching pair
+        reference_image = fingerprint_pair.reference_image
+        matching_image = fingerprint_pair.subject_image
+        matching_pair = PotentialFingerprintPair(reference_image, matching_image, True)
+        testing_dataset.append(matching_pair)
+
+        # Now we add 2 different random pairs
+        count = 0
+        random_fingerprint = RANDOM.choice(initial_dataset)
+        while count < 2:
+            # Create the PotentialFingerprintPair object
+            random_image = random_fingerprint.subject_image
+            random_pair = PotentialFingerprintPair(reference_image, random_image, False)
+
+            # If the random pair is the matching pair, pick a different one
+            if random_pair == matching_pair:
+                random_fingerprint = RANDOM.choice(initial_dataset)
+                continue
+
+            # Add the random pair to the dataset and pick a new one
+            testing_dataset.append(random_pair)
+            random_fingerprint = RANDOM.choice(initial_dataset)
+            count += 1
+
+    return testing_dataset
+
+
 def load_and_enhance_image(image_path: Path):
     # Each image is 512 x 512 pixels with 32 rows of white space at the bottom
     # Classified using one of the five following classes: A=Arch, L=Left Loop, R=Right Loop, T=Tented Arch, W=Whorl
@@ -150,7 +195,7 @@ def load_and_enhance_image(image_path: Path):
     # Enhance fingerprint image
     enhanced_image = fingerprint_enhancer.enhance_fingerprint(image)
 
-    logger.info(f"Loaded and enhanced image at {image_path}")
+    logging.info(f"Loaded and enhanced image at {image_path}")
 
     return enhanced_image
 
@@ -179,7 +224,8 @@ def main():
     logging.basicConfig(level=logging.INFO)
 
     training_directory = Path.cwd().joinpath("workdir", "train")
-    training_dataset = load_dataset(training_directory)
+    initial_training_dataset = load_dataset(training_directory)
+    training_dataset = generate_randomized_dataset(initial_training_dataset)
 
     for fingerprint_pair in training_dataset:
         print(fingerprint_pair)
