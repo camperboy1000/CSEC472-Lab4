@@ -1,0 +1,13 @@
+name: Lab4
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - opencv
+  - pip
+  - pillow
+  - pytorch
+  - torchvision
+  - pip:
+      - fingerprint-enhancer
+      - fingerprint-feature-extractor
