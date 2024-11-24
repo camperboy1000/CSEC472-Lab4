@@ -15,6 +15,7 @@ pip install -r requirements.txt
 ## Dependencies
 
 - [Python 3](https://python.org)
+- [PyTorch](https://pytorch.org)
 - [OpenCV](https://opencv.org)
 - [OpenCV-Python](https://github.com/opencv/opencv-python)
 - [Fingerprint-Enhancement-Python](https://github.com/Utkarsh-Deshmukh/Fingerprint-Enhancement-Python)
