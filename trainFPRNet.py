@@ -5,11 +5,13 @@ import logging
 from pathlib import Path
 
 import torch
+from PIL import Image
 from torch import nn, optim
 from torch.utils.data import DataLoader
+from torchvision import transforms
 
-from FPRNet.FingerprintDataset import FingerprintDataset
 from FPRNet.FPRNet import FPRNet
+from FPRNet.FingerprintDataset import FingerprintDataset
 from step1 import generate_randomized_dataset, load_dataset
 
 # pyright: basic
@@ -81,12 +83,47 @@ def train(
         )
 
 
+def test(model, reference_image, comparison_image):
+    if torch.cuda.is_available():
+        logging.info("Training model with CUDA acceleration enabled")
+        device = torch.device("cuda")
+    else:
+        logging.warning("Training model with CPU, this may be slow!")
+        device = torch.device("cpu")
+
+    reference = Image.open(reference_image).convert("L")
+    comparison = Image.open(comparison_image).convert("L")
+
+    transform = transforms.Compose(
+        [
+            transforms.Resize([512, 512]),
+            transforms.ToTensor(),
+            transforms.Normalize(0.5, 0.5),
+        ]
+    )
+
+    reference = transform(reference).unsqueeze(0).to(device)
+    comparison = transform(comparison).unsqueeze(0).to(device)
+
+    model.eval()
+    model.to(device)
+
+    with torch.no_grad():
+        output = model(reference, comparison)
+
+    predicted = output > 0.5
+    print(f"Comparing {reference_image} & {comparison_image}: {predicted}")
+
+
 def main() -> None:
     logging.basicConfig(level=logging.INFO)
 
     training_directory = Path.cwd().joinpath("workdir", "train")
+    testing_directory = Path.cwd().joinpath("workdir", "test")
     initial_training_dataset = load_dataset(training_directory)
+    initial_testing_dataset = load_dataset(testing_directory)
     randomized_training_dataset = generate_randomized_dataset(initial_training_dataset)
+    randomized_testing_dataset = generate_randomized_dataset(initial_testing_dataset)
     training_dataset = FingerprintDataset(randomized_training_dataset)
 
     train_size = int(0.8 * len(training_dataset))
@@ -98,10 +135,20 @@ def main() -> None:
     train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
 
+    # Train and save model
     model = FPRNet()
     train(model, train_loader, val_loader, 50)
+    torch.save(model.state_dict(), "FPRNet.pth")
 
-    torch.save(model, "FPRNet.pth")
+    # Load model
+    model = FPRNet()
+    model.load_state_dict(torch.load("FPRNet.pth"))
+    model.eval()
+
+    for testing_pair in randomized_testing_dataset:
+        reference_image = testing_pair.reference_image
+        comparison_image = testing_pair.comparison_image
+        test(model, reference_image, comparison_image)
 
 
 if __name__ == "__main__":
